@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recipe Vision App</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f4f4f4;
+            color: #333;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: auto;
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            color: #0056b3;
+        }
+
+        input[type="file"] {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-bottom: 10px;
+        }
+
+        button {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+            button:hover {
+                background-color: #0056b3;
+            }
+
+        #statusMessage {
+            margin-top: 20px;
+            padding: 10px;
+            border-radius: 4px;
+            background-color: #e2e3e5;
+            border: 1px solid #cdd0d4;
+            display: none; /* Hidden by default */
+        }
+
+        .results {
+            margin-top: 30px;
+            border-top: 1px solid #eee;
+            padding-top: 20px;
+        }
+
+            .results h2 {
+                color: #28a745;
+            }
+
+        .recipe-list, .ingredient-list {
+            list-style: none;
+            padding: 0;
+        }
+
+            .recipe-list li, .ingredient-list li {
+                background: #f9f9f9;
+                margin-bottom: 8px;
+                padding: 10px;
+                border-radius: 4px;
+                border: 1px solid #eee;
+            }
+
+                .recipe-list li strong {
+                    color: #007bff;
+                }
+
+                .recipe-list li p {
+                    margin-top: 5px;
+                    font-size: 0.9em;
+                    color: #666;
+                }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Recipe Vision</h1>
+        <p>Upload an image of ingredients to get recipe suggestions!</p>
+
+        <input type="file" id="imageInput" accept="image/*">
+        <button id="analyzeButton">Analyze Image</button>
+
+        <div id="statusMessage"></div>
+
+        <div class="results" id="resultsContainer" style="display: none;">
+            <h2>Detected Ingredients:</h2>
+            <ul id="detectedIngredientsList" class="ingredient-list">
+            </ul>
+
+            <h2>Suggested Recipes:</h2>
+            <ul id="suggestedRecipesList" class="recipe-list">
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        // IMPORTANT: Replace this with your actual API URL from dotnet run
+        // Example: "https://localhost:7001/ImageAnalysis/analyze"
+        const API_URL = "https://localhost:7281/ImageAnalysis/analyze"; // <--- REMEMBER TO UPDATE THIS!
+
+        const imageInput = document.getElementById('imageInput');
+        const analyzeButton = document.getElementById('analyzeButton');
+        const statusMessage = document.getElementById('statusMessage');
+        const resultsContainer = document.getElementById('resultsContainer');
+        const detectedIngredientsList = document.getElementById('detectedIngredientsList');
+        const suggestedRecipesList = document.getElementById('suggestedRecipesList');
+
+        analyzeButton.addEventListener('click', async () => {
+            const file = imageInput.files[0];
+            if (!file) {
+                showStatus('Please select an image file first.', 'error');
+                return;
+            }
+
+            showStatus('Analyzing image...', 'info');
+            resultsContainer.style.display = 'none'; // Hide previous results
+            detectedIngredientsList.innerHTML = '';
+            suggestedRecipesList.innerHTML = '';
+
+            const formData = new FormData();
+            formData.append('imageFile', file); // 'imageFile' must match [FromForm] IFormFile imageFile in your API
+
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({ message: 'Unknown error' }));
+                    throw new Error(`HTTP error! Status: ${response.status} - ${errorData.message || response.statusText}`);
+                }
+
+                const data = await response.json();
+                showStatus(data.message || 'Analysis complete.', 'success');
+                displayResults(data);
+
+            } catch (error) {
+                console.error('Error:', error);
+                showStatus(`Error analyzing image: ${error.message}`, 'error');
+            }
+        });
+
+        function showStatus(message, type) {
+            statusMessage.textContent = message;
+            statusMessage.style.display = 'block';
+            statusMessage.style.backgroundColor = ''; // Reset background
+            statusMessage.style.borderColor = ''; // Reset border
+
+            if (type === 'info') {
+                statusMessage.style.backgroundColor = '#d1ecf1';
+                statusMessage.style.borderColor = '#bee5eb';
+            } else if (type === 'success') {
+                statusMessage.style.backgroundColor = '#d4edda';
+                statusMessage.style.borderColor = '#c3e6cb';
+            } else if (type === 'error') {
+                statusMessage.style.backgroundColor = '#f8d7da';
+                statusMessage.style.borderColor = '#f5c6cb';
+            }
+        }
+
+        function displayResults(data) {
+            resultsContainer.style.display = 'block';
+
+            // Display Detected Ingredients
+            if (data.detectedIngredients && data.detectedIngredients.length > 0) {
+                data.detectedIngredients.forEach(ingredient => {
+                    const li = document.createElement('li');
+                    li.textContent = ingredient;
+                    detectedIngredientsList.appendChild(li);
+                });
+            } else {
+                const li = document.createElement('li');
+                li.textContent = "No specific ingredients detected.";
+                detectedIngredientsList.appendChild(li);
+            }
+
+            // Display Suggested Recipes
+            if (data.matchingRecipes && data.matchingRecipes.length > 0) {
+                data.matchingRecipes.forEach(recipe => {
+                    const li = document.createElement('li');
+                    li.innerHTML = `
+                        <strong>${recipe.name}</strong><br>
+                        <p><strong>Required:</strong> ${recipe.requiredIngredients.join(', ')}</p>
+                        <p><strong>Instructions:</strong> ${recipe.instructions}</p>
+                    `;
+                    suggestedRecipesList.appendChild(li);
+                });
+            } else {
+                const li = document.createElement('li');
+                li.textContent = "No recipes found matching the detected ingredients.";
+                suggestedRecipesList.appendChild(li);
+            }
+        }
+    </script>
+</body>
+</html>

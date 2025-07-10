@@ -1,0 +1,36 @@
+# Visual Studio
+.vs/
+bin/
+obj/
+*.exe
+*.dll
+*.pdb
+*.suo
+*.user
+*.userosf
+*.config
+*.log
+[Dd]ebug/
+[Rr]elease/
+# NuGet
+packages/
+# Azure App Service specific
+Azure/
+# Sensitive data (IMPORTANT!)
+appsettings.Development.json
+appsettings.Production.json
+appsettings.json # If you're using environment variables for secrets
+appsettings.*.json # Catch all specific environment appsettings
+*.user
+publish/
+# Node.js (if you ever add npm packages to frontend)
+node_modules/
+
+# Exclude specific files containing secrets
+# IMPORTANT: Make sure your AzureVision:Endpoint and Key are NOT committed
+# These should be managed as Azure App Service Application Settings, not in source control.
+# If you currently have them in appsettings.json, you MUST remove them from there
+# BEFORE committing and store them only in environment variables or Azure App Settings.
+# For a side project, if you're not planning complex secret management,
+# you can remove them from appsettings.json and set them directly in Azure's
+# application settings for the App Service.
