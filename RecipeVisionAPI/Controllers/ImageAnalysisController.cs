@@ -9,7 +9,6 @@ namespace RecipeVisionAPI.Controllers
     [Route("[controller]")]
     public class ImageAnalysisController : ControllerBase
     {
-        // Inside the ImageAnalysisController class
         private List<Recipe> GetSampleRecipes()
         {
             return new List<Recipe>
@@ -20,7 +19,7 @@ namespace RecipeVisionAPI.Controllers
             Name = "Apple Crumble",
             RequiredIngredients = { "apple", "flour", "sugar", "butter", "cinnamon" },
             Instructions = "Slice apples, mix with sugar and cinnamon. Top with flour, sugar, butter crumble. Bake at 375F for 30-40 mins.",
-            ImageUrl = "https://example.com/apple_crumble.jpg" // Placeholder image URL
+            ImageUrl = "https://example.com/apple_crumble.jpg" 
         },
         new Recipe
         {
@@ -28,7 +27,7 @@ namespace RecipeVisionAPI.Controllers
             Name = "Tomato Pasta",
             RequiredIngredients = { "tomato", "pasta", "onion", "garlic", "olive oil" },
             Instructions = "Cook pasta. Sauté onion and garlic, add diced tomatoes. Mix with pasta.",
-            ImageUrl = "https://example.com/tomato_pasta.jpg" // Placeholder image URL
+            ImageUrl = "https://example.com/tomato_pasta.jpg" 
         },
         new Recipe
         {
@@ -36,7 +35,7 @@ namespace RecipeVisionAPI.Controllers
             Name = "Scrambled Eggs",
             RequiredIngredients = { "egg", "butter", "milk" },
             Instructions = "Whisk eggs with milk. Melt butter in pan, pour eggs, scramble until cooked.",
-            ImageUrl = "https://example.com/scrambled_eggs.jpg" // Placeholder image URL
+            ImageUrl = "https://example.com/scrambled_eggs.jpg" 
         },
         new Recipe
         {
@@ -44,12 +43,12 @@ namespace RecipeVisionAPI.Controllers
             Name = "Chicken Stir-fry",
             RequiredIngredients = { "chicken", "broccoli", "carrot", "soy sauce", "ginger", "garlic" },
             Instructions = "Cut chicken and vegetables. Stir-fry chicken, then add veggies. Add sauce and serve.",
-            ImageUrl = "https://example.com/chicken_stirfry.jpg" // Placeholder image URL
+            ImageUrl = "https://example.com/chicken_stirfry.jpg" 
         }
     };
         }
 
-        // You will modify the AnalyzeImage method next
+       
 
         private readonly string _azureVisionEndpoint;
         private readonly string _azureVisionKey;
@@ -84,7 +83,7 @@ namespace RecipeVisionAPI.Controllers
                     ImageAnalysisResult result = await client.AnalyzeAsync(
                         imageData,
                         features,
-                        new ImageAnalysisOptions() // Options object is still used for other parameters
+                        new ImageAnalysisOptions() 
                     );
 
                     List<string> detectedIngredientNames = new List<string>();
